@@ -1,94 +1,73 @@
 import re
 
 def is_palindrome(date_str):
-    parts = re.split(r'\D+', date_str)
-    parts = [p for p in parts if p]
-
-    if not is_valid_date(parts):
+    digits = ''.join(filter(str.isdigit, date_str))
+    no_zero = digits.replace('0', '')
+    if no_zero != no_zero[::-1]:
         return False
-
-    processed_parts = []
-    for p in parts:
-        stripped = p.lstrip('0')
-        if not stripped:
-            stripped = '0'
-        processed_parts.append(stripped)
-    concatenated = ''.join(processed_parts)
-    return concatenated == concatenated[::-1]
-
-def is_valid_date(parts):
+    
+    parts = [part for part in re.split(r'\D', date_str) if part]
     if len(parts) != 3:
         return False
-
-    # Check YYYY-MM-DD format
-    if len(parts[0]) == 4 and parts[0].isdigit():
-        year_str, month_str, day_str = parts
+        
+    max_days_list = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    
+    if len(parts[0]) == 4:
         try:
-            year = int(year_str)
-            month = int(month_str)
-            day = int(day_str)
-        except ValueError:
-            pass
+            y, m, d = int(parts[0]), int(parts[1]), int(parts[2])
+        except:
+            return False
+        if m < 1 or m > 12:
+            return False
+        if m == 2:
+            leap = (y % 4 == 0 and y % 100 != 0) or (y % 400 == 0)
+            days_in_month = 29 if leap else 28
         else:
-            if year < 1 or month < 1 or month > 12 or day < 1:
-                return False
-
-            if month in (4, 6, 9, 11):
-                max_day = 30
-            elif month == 2:
-                if (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0):
-                    max_day = 29
-                else:
-                    max_day = 28
-            else:
-                max_day = 31
-
-            if day > max_day:
-                return False
+            days_in_month = max_days_list[m]
+        if 1 <= d <= days_in_month:
             return True
-
-    valid = False
-    # Try DD-MM-YY format
-    try:
-        day = int(parts[0])
-        month = int(parts[1])
-        year = int(parts[2])
-    except ValueError:
-        pass
-    else:
-        if 1 <= month <= 12:
-            if month in (4, 6, 9, 11):
-                max_day = 30
-            elif month == 2:
-                max_day = 28  # Assume non-leap year for two-digit year
-            else:
-                max_day = 31
-            if 1 <= day <= max_day:
-                valid = True
-
-    if not valid:
-        # Try MM-DD-YY format
-        try:
-            month = int(parts[0])
-            day = int(parts[1])
-            year = int(parts[2])
-        except ValueError:
-            pass
         else:
-            if 1 <= month <= 12:
-                if month in (4, 6, 9, 11):
-                    max_day = 30
-                elif month == 2:
-                    max_day = 28
+            return False
+    else:
+        if len(parts[2]) == 0 or len(parts[2]) > 2:
+            return False
+        try:
+            yy = int(parts[2])
+        except:
+            return False
+        y = 1900 + yy if yy >= 70 else 2000 + yy
+        
+        try:
+            d0 = int(parts[0])
+            m0 = int(parts[1])
+            if 1 <= m0 <= 12:
+                if m0 == 2:
+                    leap = (y % 4 == 0 and y % 100 != 0) or (y % 400 == 0)
+                    days_in_month0 = 29 if leap else 28
                 else:
-                    max_day = 31
-                if 1 <= day <= max_day:
-                    valid = True
+                    days_in_month0 = max_days_list[m0]
+                if 1 <= d0 <= days_in_month0:
+                    return True
+        except:
+            pass
+            
+        try:
+            m1 = int(parts[0])
+            d1 = int(parts[1])
+            if 1 <= m1 <= 12:
+                if m1 == 2:
+                    leap = (y % 4 == 0 and y % 100 != 0) or (y % 400 == 0)
+                    days_in_month1 = 29 if leap else 28
+                else:
+                    days_in_month1 = max_days_list[m1]
+                if 1 <= d1 <= days_in_month1:
+                    return True
+        except:
+            pass
+            
+    return False
 
-    return valid
-
-# test case
-print (is_palindrome('25/5/25'))
-print (is_palindrome('5-25-25'))
-print (is_palindrome('3333|03|03'))
-print (is_palindrome('31-11-13'))
+print(is_palindrome("25/5/25"))  
+print(is_palindrome("5-25-25"))  
+print(is_palindrome("3333|03|03")) 
+print(is_palindrome("29-9-92"))
